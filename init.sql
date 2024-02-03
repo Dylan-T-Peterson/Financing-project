@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS hours (
   lunch_in DATETIME,
   clock_out DATETIME NOT NULL,
   worked_hours FLOAT NOT NULL,
+  check_cutoff DATE NOT NULL,
   check_date DATE NOT NULL,
   expected_check FLOAT NOT NULL
 );
