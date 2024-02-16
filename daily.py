@@ -4,26 +4,34 @@ import datetime as dt
 
 import numpy as np
 import pandas as pd
-from pandas.core.dtypes.dtypes import time
 
 
-def dt_verify(to_change: str, new_type: dt.date | dt.time) -> dt.date | dt.time:
+def input_verify(to_change: str, new_type: type):
     while True:
-        try:
-            changed = new_type.fromisoformat(to_change)
-            return changed
-        except ValueError:
-            match new_type:
-                case dt.date:
-                    to_change = input("Please enter a valid date[YY-MM-DD]: ")
-                case dt.time:
-                    to_change = input("Please enter a valid timej[HH:MM]: ")
-                case _:
-                    print("Unsupported type for function dt_verify")
+        match new_type:
+            case dt.date | dt.time:
+                try:
+                    changed = new_type.fromisoformat(to_change)
+                    return changed
+                except ValueError:
+                    if new_type == dt.date:
+                        to_change = input("Please enter a valid date[YY-MM-DD]: ")
+                        continue
+                    if new_type == dt.time:
+                        to_change = input("Please enter a valid time[HH:MM]: ")
+                        continue
+                except Exception as e:
+                    print(f"{e}\nHow did you get here?? Contact me with the error.")
                     quit()
-        except Exception as e:
-            print(f"{e}\nHow did you get here?? Contact me with the error.")
-            quit()
+            case _:
+                try:
+                    changed = new_type(to_change)
+                    return changed
+                except ValueError:
+                    to_change = input(f"Please enter a valid {new_type}: ")
+                except Exception as e:
+                    print(f"{e}\nHow did you get here?? Contact me with the error.")
+                    quit()
 
 
 def db_init():
@@ -78,7 +86,7 @@ def add_hours(conn: sqlite3.Connection):
     if i_data["day"] == "":
         i_data["day"] = dt.date.today()
     else:
-        dt_verify(i_data["day"], dt.date)
+        input_verify(i_data["day"], dt.date)
     for key in list(i_data.keys())[1:]:
         if key in ["lunch-in", "lunch-out"]:
             i_data[key] = input(f"{key} [HH:MM] leave empty if not applicable: ")
@@ -87,7 +95,7 @@ def add_hours(conn: sqlite3.Connection):
                 continue
         else:
             i_data[key] = input(f"{key} [HH:MM]: ")
-        i_data[key] = dt_verify(i_data[key], dt.time)
+        i_data[key] = input_verify(i_data[key], dt.time)
 
     yn = kv_verify(i_data)
     while yn != "y":
@@ -102,7 +110,7 @@ Which would you like to change? keep empty to keep: """
             break
         elif change not in i_data.keys():
             continue
-        i_data[change] = dt_verify(
+        i_data[change] = input_verify(
             input(f"change {change}[{i_data[change]}] to: "), i_data[change]
         )
         yn = kv_verify(i_data)
@@ -131,7 +139,7 @@ Which would you like to change? keep empty to keep: """
     )
     if entry.check_date.empty:
         be_data["check_date"] = input("When will your next check be[YYYY-MM-DD]?: ")
-        be_data["check_date"] = dt_verify(be_data["check_date"], dt.date)
+        be_data["check_date"] = input_verify(be_data["check_date"], dt.date)
         be_data["expected_check"] = 0.00
     elif i_data["day"] == (entry.check_date[0] - dt.timedelta(weeks=1)):
         print("Rolling into a new pay period.")
@@ -145,7 +153,34 @@ Which would you like to change? keep empty to keep: """
 
 
 def add_check(conn: sqlite3.Connection):
-    pass
+    conn = conn
+    cur = conn.cursor()
+    i_data = {
+        "check_date": dt.date,
+        "normal_hours": dt.time,
+        "ot_hours": dt.time,
+        "gross_income": float,
+        "tax": float,
+        "post_tax_deduction": float,
+        "net_income": float,
+        "notes": str,
+    }
+    i_data["check_date"] = input_verify(
+        input("What is the date of your check?"), dt.date
+    )
+    for key in list(i_data.keys())[1:3]:
+        i_data[key] = input_verify(
+            input(f'How many {key.replace("_"," ")} from this check?: '), dt.time
+        )
+    for key in list(i_data.keys())[3:7]:
+        i_data[key] = input_verify(
+            input(f'How much {key.replace("_"," ")} for this check?: '), float
+        )
+    i_data["notes"] = input("Any notes for this check?: ")
+    if i_data["notes"] == "":
+        i_data["notes"] = None
+    entry = list((i_data).values())
+    cur.execute("INSERT INTO paychecks VALUES(?, ?, ?, ?, ?, ?, ?, ?)", entry)
 
 
 def main():

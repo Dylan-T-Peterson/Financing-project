@@ -10,16 +10,16 @@ CREATE TABLE IF NOT EXISTS hours (
   expected_check FLOAT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS paychecks (
-  check_id FLOAT PRIMARY KEY,
+  check_id INT PRIMARY KEY,
   check_date DATE NOT NULL,
   norm_hours FLOAT NOT NULL,
-  qaqc_hours FLOAT NOT NULL,
   ot_hours FLOAT NOT NULL,
   gross FLOAT NOT NULL,
   tax FLOAT NOT NULL,
   tax_percent FLOAT NOT NULL,
   post_tax_ded FLOAT NOT NULL,
   net FLOAT NOT NULL
+  notes TEXT,
 );
 CREATE TABLE IF NOT EXISTS necessities (
   id INTEGER PRIMARY KEY,
