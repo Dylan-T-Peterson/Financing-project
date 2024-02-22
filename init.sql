@@ -29,18 +29,25 @@ CREATE TABLE IF NOT EXISTS necessities (
   exp_percent_net FLOAT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS bills (
-  bill_id INTEGER PRIMARY KEY,
-  name TEXT NOT NULL,
+  name TEXT PRIMARY KEY,
+  frequency CHAR NOT NULL,
   due_date DATE NOT NULL,
   cost FLOAT NOT NULL,
   yearly_cost FLOAT NOT NULL,
-  percent_net FLOAT NOT NULL
+  percent_annual FLOAT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS loans(
-  loan_id INTEGER PRIMARY KEY,
-  name TEXT NOT NULL,
+  name TEXT PRIMARY KEY,
+  frequency CHAR NOT NULL,
   due_date DATE NOT NULL,
   cost FLOAT NOT NULL,
   yearly_cost FLOAT NOT NULL,
-  percent_net FLOAT NOT NULL
+  percent_annual FLOAT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS job_info(
+  start_date DATE PRIMARY KEY,
+  end_date DATE,
+  position_title TEXT NOT NULL,
+  hourly_wage FLOAT NOT NULL,
+  annual_wage FLOAT NOT NULL,
 );
